@@ -1,52 +1,30 @@
-import tensorflow.keras
-import cv2
-from PIL import Image, ImageOps
-import numpy as np
-import keyboard
-
-np.set_printoptions(suppress=True)
-model = tensorflow.keras.models.load_model('./Model/keras_model.h5')
-
-# webcam size : 480 x 640
-data = np.ndarray(shape=(1, 480, 640, 3), dtype=np.float32)
-
-# 0 : default camera mode
-cap = cv2.VideoCapture(0)
-
-i = 0
-while cap.isOpened():
-    i += 1
-
-    success, frame = cap.read()
-    if success:
-        cv2.imshow('Camera Window', frame)
-
-        # press ESC key to quit
-        key = cv2.waitKey(1) & 0xFF
-        if key == 27:
-            break
-
-        # code to reduce calculating
-        if i % 7 != 0:
-            continue
-
-        # Normalize the image
-        normalized_image_array = (frame.astype(np.float32) / 127.0) - 1
-
-        # Load the image into the array
-        data[0] = normalized_image_array
-        [[jump, hold]] = model.predict(data)
-
-        # for debugging
-        print("[*] prediction :")
-        print(" - Jump :", jump * 100)
-        print(" - Hold :", hold * 100)
+import os
+from selenium import webdriver
+import Web.server as Server
 
 
-        if hold * 100 < 1:
-            keyboard.send_spacebar()
+class App:
+    def __init__(self):
+        self.cam_browser = None
+        self.game_browser = None
 
+    def init_server(self):
+        Server.init_server()
 
+    def init_browser(self):
+        chrome_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'chromedriver.exe')
+        self.cam_browser = webdriver.Chrome(chrome_path)
+        self.cam_browser.get('http://localhost:5000/cam')
 
-cap.release()
-cv2.destroyAllWindows()
+        self.game_browser = webdriver.Chrome(chrome_path)
+        self.game_browser.get('chrome://dino')
+
+        print("[*] Initializing Chrome browser")
+
+    def run(self):
+        self.init_server()
+        self.init_browser()
+
+if __name__ == '__main__':
+    app = App()
+    app.run()
