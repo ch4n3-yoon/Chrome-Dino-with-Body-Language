@@ -19,6 +19,7 @@
     <meta name="twitter:image:src" content="http://img.thecodepost.org/2015/01/trex.png">
     <script src="https://apis.google.com/js/platform.js" async defer></script>
     <script type="text/javascript">
+        const MAX_JUMP = 30;
         function hideClass(name) {
             var myClasses = document.querySelectorAll(name),
                 i = 0,
@@ -116,9 +117,9 @@
                 GRAVITY: 0.6,
                 INITIAL_JUMP_VELOCITY: 12,
                 MAX_CLOUDS: 6,
-                MAX_OBSTACLE_LENGTH: 3,
+                MAX_OBSTACLE_LENGTH: 2, // 난이도 조정
                 MAX_SPEED: 12,
-                MIN_JUMP_HEIGHT: 35,
+                MIN_JUMP_HEIGHT: MAX_JUMP,
                 MOBILE_SPEED_COEFFICIENT: 1.2,
                 RESOURCE_TEMPLATE_ID: 'audio-resources',
                 SPEED: 6,
@@ -162,7 +163,7 @@
                     },
                     {
                         name: 'HORIZON',
-                        id: '1x-horizon'
+                        id: '1x-horiz   on'
                     },
                     {
                         name: 'RESTART',
@@ -460,11 +461,9 @@
                  * Update the game frame.
                  */
                 update: function () {
-                    // console.log(this.tRex.jumping);
                     this.drawPending = false;
                     var now = getTimeStamp();
                     var deltaTime = now - (this.time || now);
-                    // console.log(this.time);
                     this.time = now;
                     if (this.activated) {
                         this.clearCanvas();
@@ -1047,7 +1046,9 @@
              * Maximum obstacle grouping count.
              * @const
              */
-            Obstacle.MAX_OBSTACLE_LENGTH = 3,
+            // MAX_OBSTACLE_LENGTH 난이도 조정
+            // 3으로 설정할 경우 일반적인 게임으로 변경됨
+            Obstacle.MAX_OBSTACLE_LENGTH = 2,
                 Obstacle.prototype = {
                     /**
                      * Initialise the DOM for the obstacle.
@@ -1064,10 +1065,10 @@
                         this.draw();
                         // Make collision box adjustments,
                         // Central box is adjusted to the size as one box.
-                        // ____ ______ ________
-                        // _| |-| _| |-| _| |-|
-                        // | |<->| | | |<--->| | | |<----->| |
-                        // | | 1 | | | | 2 | | | | 3 | |
+                        //     ____ ______ ________
+                        //   _| |-| _| |-| _| |-|
+                        //   | |<->| | | |<--->| | | |<----->| |
+                        //  | | 1 | | | | 2 | | | | 3 | |
                         // |_|___|_| |_|_____|_| |_|_______|_|
                         //
                         if (this.size > 1) {
@@ -1120,7 +1121,7 @@
                         var minGap = Math.round(this.width * speed +
                             this.typeConfig.minGap * gapCoefficient);
                         // 난이도 조정
-                        minGap += 2;
+                        minGap += 200;
                         var maxGap = Math.round(minGap * Obstacle.MAX_GAP_COEFFICIENT);
                         return getRandomNum(minGap, maxGap);
                     },
@@ -1216,13 +1217,13 @@
              * @enum {number}
              */
             Trex.config = {
-                DROP_VELOCITY: -5,
+                DROP_VELOCITY: -10,  // Default : -5, 난이도 조정 : -10
                 GRAVITY: 0.6,
                 HEIGHT: 47,
-                INIITAL_JUMP_VELOCITY: -10,
+                INIITAL_JUMP_VELOCITY: -12, // Default : -10, 난이도 조정 : -30
                 INTRO_DURATION: 1500,
-                MAX_JUMP_HEIGHT: 30,
-                MIN_JUMP_HEIGHT: 30,
+                MAX_JUMP_HEIGHT: MAX_JUMP,
+                MIN_JUMP_HEIGHT: MAX_JUMP,
                 SPEED_DROP_COEFFICIENT: 3,
                 SPRITE_WIDTH: 262,
                 START_X_POS: 50,
@@ -1956,10 +1957,11 @@
                     this.obstacles = updatedObstacles;
                     if (this.obstacles.length > 0) {
                         var lastObstacle = this.obstacles[this.obstacles.length - 1];
+                        // 난이도 조정
                         if (lastObstacle && !lastObstacle.followingObstacleCreated &&
                             lastObstacle.isVisible() &&
                             (lastObstacle.xPos + lastObstacle.width + lastObstacle.gap) <
-                            this.dimensions.WIDTH) {
+                                this.dimensions.WIDTH + 10) {
                             this.addNewObstacle(currentSpeed);
                             lastObstacle.followingObstacleCreated = true;
                         }
@@ -1973,11 +1975,15 @@
                  * @param {number} currentSpeed
                  */
                 addNewObstacle: function (currentSpeed) {
+                    // 장애물 타입 결정 (small cactus, big cactus ... )
                     var obstacleTypeIndex =
                         getRandomNum(0, Obstacle.types.length - 1);
                     var obstacleType = Obstacle.types[obstacleTypeIndex];
+                    // console.log(obstacleType);
                     var obstacleImg = this.obstacleImgs[obstacleType.type];
                     this.obstacles.push(new Obstacle(this.canvasCtx, obstacleType,
+                        obstacleImg, this.dimensions, this.gapCoefficient, currentSpeed));
+                    console.log(new Obstacle(this.canvasCtx, obstacleType,
                         obstacleImg, this.dimensions, this.gapCoefficient, currentSpeed));
                 },
                 /**
@@ -2689,7 +2695,7 @@
         }
     </script>
     <script>
-        function jump() {
+        function tRexJump() {
             Runner.instance_.playSound(Runner.instance_.soundFx.BUTTON_PRESS);
             Runner.instance_.tRex.startJump();
         }

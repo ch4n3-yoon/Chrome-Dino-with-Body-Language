@@ -22,10 +22,15 @@
             Runner.instance_.tRex.startJump();
         }
 
-
+        let last_jump_time = 0
         function jump() {
-            let url = 'http://localhost:5000/jump';
-            fetch(url);
+            let now = startTime = performance.now();
+            if (now - last_jump_time > 500) {
+                const jump_url = 'http://localhost:5000/jump';
+                fetch(jump_url);
+                console.log('jump() called');
+                last_jump_time = now;
+            }
         }
 
         // More API functions here:
@@ -33,7 +38,11 @@
 
         // the link to your model provided by Teachable Machine export panel
         // const URL = "https://teachablemachine.withgoogle.com/models/ImuYGIejU/";
-        const URL = "https://teachablemachine.withgoogle.com/models/QFQb0N7BN/";
+        // const URL = "https://teachablemachine.withgoogle.com/models/QFQb0N7BN/";
+        // const URL = "https://teachablemachine.withgoogle.com/models/Xv3ZUTROp/";
+        // const URL = "https://teachablemachine.withgoogle.com/models/zvWwyEjqu/"; // tilt
+        const URL = "https://teachablemachine.withgoogle.com/models/58mpFoDrG/"; // 팔 들어올리기
+
         let model, webcam, ctx, labelContainer, maxPredictions;
         let count = 0;
 
@@ -48,12 +57,13 @@
             maxPredictions = model.getTotalClasses();
 
             // Convenience function to setup a webcam
-            const size = 200;
             const width = 640;
             const height = 480;
             const flip = true; // whether to flip the webcam
             webcam = new tmPose.Webcam(width, height, flip); // width, height, flip
-            await webcam.setup(); // request access to the webcam
+
+            // request access to the webcam
+            await webcam.setup();
             await webcam.play();
             window.requestAnimationFrame(loop);
 
@@ -68,9 +78,7 @@
         }
 
         async function loop(timestamp) {
-            if (count % 2 == 0)
-                webcam.update(); // update the webcam frame
-            count += 1;
+            webcam.update();
             await predict();
             window.requestAnimationFrame(loop);
         }
@@ -88,7 +96,7 @@
                 labelContainer.childNodes[i].innerHTML = classPrediction;
             }
 
-            if (prediction[1].probability > 0.7) {
+            if (prediction[0].probability > 0.8) {
                 jump();
             }
 
@@ -102,8 +110,8 @@
                 // draw the keypoints and skeleton
                 if (pose) {
                     const minPartConfidence = 0.5;
-                    tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx);
-                    tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx);
+                    // tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx);
+                    // tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx);
                 }
             }
         }

@@ -7,18 +7,15 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 import keyboard
 from flask import Flask, render_template
 from flask_cors import CORS
+from flask_apscheduler import APScheduler
 import threading
 import time
+import http
 
 
 app = Flask(__name__)
 CORS(app, resources={r'*': {'origins': '*'}})
-
-@app.route('/jump')     
-def jump():
-    keyboard.send_spacebar()
-    time.sleep(1)
-    return ''
+func = keyboard.send_spacebar
 
 
 @app.route('/cam')
@@ -31,9 +28,16 @@ def game():
     return render_template('chrome-dino.html')
 
 
-def init_server():
+@app.route('/jump')
+def jump():
+    func()
+    return '', http.HTTPStatus.NO_CONTENT
+
+
+def init_server(jump_function=keyboard.send_spacebar):
+    func = jump_function
     threading.Thread(target=app.run).start()
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True, threaded=True, port=3000)
