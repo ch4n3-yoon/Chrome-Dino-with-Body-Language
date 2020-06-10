@@ -6,6 +6,11 @@
     <title>Tensorflow.js Cam</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8/dist/teachablemachine-pose.min.js"></script>
+    <style>
+        #video {
+            width: 30%;
+        }
+    </style>
 </head>
 <body>
 
@@ -13,22 +18,28 @@
     <div><canvas id="canvas"></canvas></div>
     <div id="label-container"></div>
 
+    <button id="tilt" onclick="init('https://teachablemachine.withgoogle.com/models/QLN3HQkyf/');" onmouseover="showExampleVideo(this);">Tilt</button>
+    <button id="arms" onclick="init('https://teachablemachine.withgoogle.com/models/58mpFoDrG/');" onmouseover="showExampleVideo(this);">Put your hands up</button>
+    <button id="jump" onclick="init('https://teachablemachine.withgoogle.com/models/Fhn09Tfoi/');" onmouseover="showExampleVideo(this);">Real Jump</button>
+    <div id="video"></div>
+
     <script type="text/javascript">
 
-        function jump() {
+        // 이 방식은 Chrome Dino 게임의 자바스크립트 리소스를 이용하여 점프하도록 하는 방식임.
+        function JumpWithJavascript() {
             if (!Runner.instance_.tRex.jumping) {
                 Runner.instance_.playSound(Runner.instance_.soundFx.BUTTON_PRESS);
             }
             Runner.instance_.tRex.startJump();
         }
 
-        let last_jump_time = 0
+        // WinAPI를 이용하여 실제 Keyboard Signal을 기반으로 점프하는 방식임.
+        let last_jump_time = 0;
         function jump() {
-            let now = startTime = performance.now();
+            let now = performance.now();
             if (now - last_jump_time > 500) {
                 const jump_url = 'http://localhost:5000/jump';
                 fetch(jump_url);
-                console.log('jump() called');
                 last_jump_time = now;
             }
         }
@@ -42,12 +53,12 @@
         // const URL = "https://teachablemachine.withgoogle.com/models/Xv3ZUTROp/";
         // const URL = "https://teachablemachine.withgoogle.com/models/zvWwyEjqu/"; // tilt
         // const URL = "https://teachablemachine.withgoogle.com/models/58mpFoDrG/"; // 팔 들어올리기
-        const URL = "https://teachablemachine.withgoogle.com/models/Fhn09Tfoi/"; // 실제 점프
+        // const URL = "https://teachablemachine.withgoogle.com/models/Fhn09Tfoi/"; // 실제 점프
+        let URL = '';
 
         let model, webcam, ctx, labelContainer, maxPredictions;
-        let count = 0;
 
-        async function init() {
+        async function init(URL) {
             const modelURL = URL + "model.json";
             const metadataURL = URL + "metadata.json";
 
@@ -117,7 +128,23 @@
             }
         }
 
-        init();
+    </script>
+    <script>
+        function showExampleVideo(element) {
+            let videoDiv = document.getElementById('video');
+            console.log(videoDiv);
+            window['element'] = element;
+            let id = element.getAttribute('id');
+            switch (id) {
+                case 'tilt': 
+                    break;
+                case 'arms':
+                    videoDiv.innerHTML = "<video src='/resources/arms.mp4' autoplay='autoplay' controls='false'></video>";
+                    break;
+                case 'jump':
+                    videoDiv.innerHTML = "<video src='/resources/jump.mp4' autoplay='autoplay' controls='false'></video>"
+            }
+        }
     </script>
 </body>
 </html>
