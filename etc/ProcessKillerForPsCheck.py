@@ -10,7 +10,6 @@ blacklists = [ 'kakaotalk', 'slack', 'naver.line', 'telegram', 'trillian', 'aim'
 
 tasklist = [task.strip() for task in os.popen('tasklist').readlines()]
 
-p = []
 for task in tasklist:
     m = re.match("(.+?) +(\d+) (.+?) +(\d+) +(\d+.* K).*", str(task))
     if m is not None:
