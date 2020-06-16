@@ -1,0 +1,3 @@
+selenium
+flask
+flask_cors
