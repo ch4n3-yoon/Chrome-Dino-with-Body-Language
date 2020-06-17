@@ -6,7 +6,7 @@ import re
 blacklists = [ 'kakaotalk', 'slack', 'naver.line', 'telegram', 'trillian', 'aim', 'pidgin', 'paltalk', 'digsby',
         'facebook', 'messenger', 'icq', 'miranda', 'chrome', 'firefox', 'safari', 'whale', 'mail', 'outlook',
         'thunderbird', 'onedrive', 'backup and sync', 'dropbox', 'skype', 'iexplore', 'edge', 'icloud', 'line.exe',
-        'webex' ]
+        'webex', 'between', 'discord']
 
 tasklist = [task.strip() for task in os.popen('tasklist').readlines()]
 
